@@ -63,9 +63,7 @@ Job artefacts are written to [`logs/`](./logs/): `last-run.json`, timestamped `.
 
 ## Demo
 
-Replace this placeholder with the final screenshot:
-
-![Assistant answering a sample question](https://example.com/amber-atlas-demo.png)
+![Assistant answering a sample question](./amber-atlas-demo.png)
 
 Never commit `.env`. After changing source code or environment variables, rebuild with:
 

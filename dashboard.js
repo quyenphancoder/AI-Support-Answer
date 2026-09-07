@@ -81,6 +81,7 @@ async function pollSyncStatus() {
 }
 async function syncAll() {
   if (syncing !== null) return;
+  if (!window.confirm("Sync all local articles to the OpenAI Vector Store?\nOnly new or changed files will be uploaded.")) return;
   syncing = "__all__";
   $("sync-all").disabled = true;
   draw();
@@ -101,6 +102,7 @@ async function syncAll() {
 }
 async function scrapeAll() {
   if (syncing !== null) return;
+  if (!window.confirm("Scrape all articles from OptiSigns now?\nThis will update local Markdown files.")) return;
   syncing = "__scrape__";
   $("scrape-all").disabled = true;
   $("sync-status").textContent = "Starting background scrape all...";
