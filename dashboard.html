@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Amber Atlas · Documents</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-100 text-slate-900">
+    <main class="mx-auto max-w-7xl p-6">
+      <div class="mb-4 flex flex-wrap gap-2">
+        <input
+          id="search" class="min-w-64 flex-1 rounded border border-slate-300 bg-white px-3 py-2 outline-none focus:border-emerald-500"
+          placeholder="Filter by title, filename, or file ID"
+          aria-label="Filter documents"
+        /><button id="refresh" class="rounded bg-slate-700 px-3 py-2 text-white">Refresh lists</button>
+        <button id="scrape-all" class="rounded bg-indigo-600 px-3 py-2 text-white">Scrape all</button>
+        <button id="sync-all" class="rounded bg-emerald-600 px-3 py-2 text-white">Sync all</button>
+      </div>
+      <p id="sync-status" role="status" class="mb-4 text-sm text-slate-600"></p>
+      <div class="grid gap-6 lg:grid-cols-2">
+        <section class="rounded-lg border bg-white p-4 shadow-sm">
+          <div class="mb-3">
+            <h2>Local articles <span id="local-count"></span></h2>
+            <p class="text-sm text-slate-500">
+              Files in data/articles · Status reflects saved upload state, not a
+              live verification.
+            </p>
+          </div>
+          <div id="local" class="max-h-[40rem] space-y-2 overflow-y-auto pr-1"></div>
+          <nav class="mt-4 flex items-center justify-between" aria-label="Local articles pagination">
+            <button id="local-prev" disabled>Previous</button>
+            <span id="local-page-info" class="text-sm text-slate-500" aria-live="polite"
+              >0 articles</span
+            >
+            <button id="local-next" disabled>Next</button>
+          </nav>
+        </section>
+        <section class="rounded-lg border bg-white p-4 shadow-sm">
+          <div class="mb-3">
+            <h2>Vector store <span id="store-count"></span></h2>
+            <p id="store-info" class="text-sm text-slate-500">
+              Loading live records from OpenAI…
+            </p>
+          </div>
+          <div id="store" class="max-h-[40rem] space-y-2 overflow-y-auto pr-1"></div>
+        </section>
+      </div>
+    </main>
+    <dialog id="preview" class="rounded-lg p-6 shadow-xl backdrop:bg-slate-900/50">
+      <button id="close">Close</button>
+      <h2 id="preview-title" class="my-4 text-xl font-semibold"></h2>
+      <pre id="content" class="max-h-[70vh] overflow-auto whitespace-pre-wrap text-sm"></pre>
+    </dialog>
+    <script src="/dashboard.js" defer></script>
+    <button id="chat-toggle" class="fixed bottom-5 right-5 rounded-full bg-emerald-600 px-5 py-3 font-semibold text-white shadow-lg" aria-controls="chat-panel" aria-expanded="false">
+      Chat with OptiBot
+    </button>
+    <section id="chat-panel" class="fixed bottom-20 right-5 w-80 rounded-lg border bg-white p-4 shadow-xl" hidden aria-label="OptiBot chat">
+      <div class="mb-3 flex items-start justify-between border-b border-slate-200 pb-3">
+        <div>
+          <strong class="text-base font-semibold text-slate-900">OptiBot</strong>
+          <p class="mt-1 text-xs text-slate-500">Answers from your uploaded documents</p>
+        </div>
+        <button id="chat-close" aria-label="Close chat">×</button>
+      </div>
+      <div id="chat-messages" class="mb-3 max-h-56 space-y-2 overflow-y-auto" role="log" aria-live="polite">
+        <p class="chat-bubble bot">
+          Hi! Choose a question below or type your own.
+        </p>
+      </div>
+      <div id="chat-suggestions" class="mb-3 space-y-1" aria-label="Suggested questions"></div>
+      <form id="chat-form" class="flex items-center gap-2 border-t border-slate-200 pt-3">
+        <input
+          id="chat-input"
+          class="min-w-0 flex-1 rounded border border-slate-300 px-2 py-2 text-sm"
+          aria-label="Your question"
+          placeholder="Ask about OptiSigns…"
+          maxlength="2000"
+          required
+        /><button id="chat-send" class="shrink-0 rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50" type="submit">Send</button>
+      </form>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,30 @@
+name: amber-atlas
+
+services:
+  app:
+    build:
+      context: .
+      target: app
+    image: amber-atlas
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    ports:
+      - "127.0.0.1:8080:8080"
+    command: ["dashboard.py"]
+  daily:
+    build:
+      context: .
+      target: daily
+    image: amber-atlas-daily
+    env_file:
+      - .env
+    environment:
+      DAILY_HOUR_UTC: "2"
+      DAILY_MINUTE_UTC: "0"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
