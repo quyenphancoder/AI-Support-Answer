@@ -11,23 +11,42 @@ from urllib.parse import parse_qs, urlparse
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from main import load_local_articles
+from main import load_local_articles, save_run
 from src.uploader import sync_articles
 from ask import answer
 
 load_dotenv()
 DATA = Path(os.getenv('DATA_DIR', 'data'))
+LOGS = Path(os.getenv('LOG_DIR', 'logs'))
 SYNC_LOCK = threading.Lock()
 JOB_LOCK = threading.Lock()
+
+
+def load_last_run():
+    path = LOGS / 'last-run.json'
+    try:
+        value = json.loads(path.read_text(encoding='utf-8')) if path.exists() else None
+        return value if isinstance(value, dict) else None
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+LAST_RUN = load_last_run()
 SYNC_JOB = {
     'operation': None,
     'status': 'idle',
     'message': 'No background sync has run yet.',
     'started_at': None,
     'finished_at': None,
-    'result': None,
-    'error': None,
+    'result': LAST_RUN.get('result') if LAST_RUN else None,
+    'error': LAST_RUN.get('error') if LAST_RUN else None,
 }
+if LAST_RUN:
+    SYNC_JOB.update(status=LAST_RUN.get('status', 'failed'),
+                    operation=LAST_RUN.get('operation'),
+                    message=LAST_RUN.get('message', 'Last run loaded.'),
+                    started_at=LAST_RUN.get('started_at'),
+                    finished_at=LAST_RUN.get('finished_at'))
 
 
 def set_job(**changes):
@@ -57,18 +76,25 @@ def sync_local_article(name):
 
 
 def run_background(operation, task):
+    started_at = sync_job_status().get('started_at')
     try:
         result = task()
-        set_job(status='success', operation=operation,
-                message=f'{operation.title()} all completed.',
-                finished_at=datetime.now(timezone.utc).isoformat(),
-                result=result or {}, error=None)
+        finished_at = datetime.now(timezone.utc).isoformat()
+        payload = {'status': 'success', 'operation': operation,
+                   'message': f'{operation.title()} all completed.',
+                   'started_at': started_at, 'finished_at': finished_at,
+                   'result': result or {}, 'error': None}
+        set_job(**payload)
     except Exception as exc:
-        set_job(status='failed', operation=operation,
-                message=f'{operation.title()} all failed.',
-                finished_at=datetime.now(timezone.utc).isoformat(),
-                result=None, error=str(exc))
+        payload = {'status': 'failed', 'operation': operation,
+                   'message': f'{operation.title()} all failed.',
+                   'started_at': started_at,
+                   'finished_at': datetime.now(timezone.utc).isoformat(),
+                   'result': None, 'error': str(exc)}
+        set_job(**payload)
     finally:
+        LOGS.mkdir(parents=True, exist_ok=True)
+        save_run(LOGS, payload)
         SYNC_LOCK.release()
 
 

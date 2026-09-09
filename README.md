@@ -36,11 +36,11 @@ Run commands inside Docker Desktop under **Containers → amber-atlas → app �
 # Scrape 30 articles to data/articles/ (no OpenAI upload)
 python main.py --scrape-only --limit 30
 
-# Scrape all articles and upload only new or changed files
-python main.py
-
 # Upload existing local Markdown files only
 python main.py --upload-only --limit 30
+
+# Scrape all articles and upload only new or changed files
+python main.py
 
 # Ask the assistant
 python ask.py "How do I add a YouTube video?"

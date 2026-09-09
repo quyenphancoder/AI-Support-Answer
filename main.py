@@ -16,6 +16,21 @@ from src.uploader import sync_articles
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 
+def save_run(logs_dir: Path, result: dict) -> None:
+    path = logs_dir / "last-run.json"
+    history = []
+    if path.exists():
+        try:
+            previous = json.loads(path.read_text(encoding='utf-8'))
+            history = previous.get('history', []) if isinstance(previous, dict) else previous
+        except (OSError, json.JSONDecodeError):
+            pass
+    history.append(result)
+    result_with_history = dict(result)
+    result_with_history['history'] = history
+    path.write_text(json.dumps(result_with_history, indent=2), encoding='utf-8')
+
+
 def load_local_articles(data_dir: Path, limit: int = 0) -> list[dict]:
     paths = sorted(path for path in (data_dir / 'articles').glob('*.md')
                    if path.is_file() and not path.is_symlink())
@@ -68,7 +83,7 @@ def main() -> int:
         result.update(status="failed", error=str(exc))
         return_code = 1
     result["finished_at"] = datetime.now(timezone.utc).isoformat()
-    (logs_dir / "last-run.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    save_run(logs_dir, result)
     print(json.dumps(result))
     return return_code
 

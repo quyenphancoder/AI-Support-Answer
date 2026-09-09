@@ -43,8 +43,12 @@ def run():
         stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S.%fZ')
         started = datetime.now(timezone.utc).isoformat()
         print(f'Starting daily run {stamp}', flush=True)
+        limit = int(os.getenv('DAILY_LIMIT', '0'))
+        command = [sys.executable, 'main.py']
+        if limit > 0:
+            command.extend(['--limit', str(limit)])
         with (logs / f'{stamp}.log').open('w') as output:
-            result = subprocess.run([sys.executable, 'main.py'], stdout=output, stderr=subprocess.STDOUT)
+            result = subprocess.run(command, stdout=output, stderr=subprocess.STDOUT)
         summary = {'started_at': started, 'finished_at': datetime.now(timezone.utc).isoformat(),
                    'exit_code': result.returncode, 'log': f'{stamp}.log'}
         artifact = logs / 'last-run.json'

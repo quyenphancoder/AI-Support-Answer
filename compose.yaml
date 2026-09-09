@@ -24,6 +24,7 @@ services:
     environment:
       DAILY_HOUR_UTC: "2"
       DAILY_MINUTE_UTC: "0"
+      DAILY_LIMIT: "5"
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
